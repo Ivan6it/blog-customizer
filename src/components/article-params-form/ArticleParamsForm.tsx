@@ -6,6 +6,7 @@ import { Select } from 'src/ui/select';
 import { Text } from 'src/ui/text';
 import { Separator } from 'src/ui/separator';
 import {
+	OptionType,
 	ArticleStateType,
 	fontFamilyOptions,
 	fontSizeOptions,
@@ -20,98 +21,99 @@ import styles from './ArticleParamsForm.module.scss';
 
 type ArticleParamsFormProps = {
 	initialSettings: ArticleStateType;
-	onApply: (settings: ArticleStateType) => void;
+	onApply: (draftSettings: ArticleStateType) => void;
 };
+
+type SettingValue = OptionType | string | number;
 
 export const ArticleParamsForm = ({
 	initialSettings,
 	onApply,
 }: ArticleParamsFormProps) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [settings, setSettings] = useState(initialSettings);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	const [draftSettings, setDraftSettings] = useState(initialSettings);
 	const formRef = useRef<HTMLDivElement>(null);
 
-	const toggleOpen = () => setIsOpen((prev) => !prev);
+	const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
 	const handleReset = () => {
-		setSettings(defaultArticleState);
+		setDraftSettings(defaultArticleState);
 		onApply(defaultArticleState);
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onApply(settings);
+		onApply(draftSettings);
 	};
+
+	const handleChange =
+		(field: keyof ArticleStateType) => (value: SettingValue) => {
+			setDraftSettings((prev) => ({
+				...prev,
+				[field]: value,
+			}));
+		};
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (formRef.current && !formRef.current.contains(event.target as Node)) {
-				setIsOpen(false);
+				setIsSidebarOpen(false);
 			}
 		};
 
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		} else {
-			document.removeEventListener('mousedown', handleClickOutside);
-		}
+		if (!isSidebarOpen) return;
+
+		document.addEventListener('mousedown', handleClickOutside);
 
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isOpen]);
+	}, [isSidebarOpen]);
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={toggleOpen} />
+			<ArrowButton isOpen={isSidebarOpen} onClick={toggleSidebar} />
 			<aside
 				ref={formRef}
-				className={clsx(styles.container, isOpen && styles.container_open)}>
+				className={clsx(
+					styles.container,
+					isSidebarOpen && styles.container_open
+				)}>
 				<form onSubmit={handleSubmit} className={styles.form}>
 					<Text as='h2' size={31} weight={800} uppercase dynamicLite>
 						Задайте параметры
 					</Text>
 					<Select
 						title='Шрифт'
-						selected={settings.fontFamilyOption}
+						selected={draftSettings.fontFamilyOption}
 						options={fontFamilyOptions}
-						onChange={(option) =>
-							setSettings((prev) => ({ ...prev, fontFamilyOption: option }))
-						}
+						onChange={handleChange('fontFamilyOption')}
 					/>
 					<RadioGroup
 						name='fontSize'
 						title='Размер шрифта'
 						options={fontSizeOptions}
-						selected={settings.fontSizeOption}
-						onChange={(option) =>
-							setSettings((prev) => ({ ...prev, fontSizeOption: option }))
-						}
+						selected={draftSettings.fontSizeOption}
+						onChange={handleChange('fontSizeOption')}
 					/>
 					<Select
 						title='Цвет шрифта'
-						selected={settings.fontColor}
+						selected={draftSettings.fontColor}
 						options={fontColors}
-						onChange={(color) =>
-							setSettings((prev) => ({ ...prev, fontColor: color }))
-						}
+						onChange={handleChange('fontColor')}
 					/>
 					<Separator />
 					<Select
 						title='Цвет фона'
-						selected={settings.backgroundColor}
+						selected={draftSettings.backgroundColor}
 						options={backgroundColors}
-						onChange={(bg) =>
-							setSettings((prev) => ({ ...prev, backgroundColor: bg }))
-						}
+						onChange={handleChange('backgroundColor')}
 					/>
 					<Select
 						title='Ширина контента'
-						selected={settings.contentWidth}
+						selected={draftSettings.contentWidth}
 						options={contentWidthArr}
-						onChange={(option) =>
-							setSettings((prev) => ({ ...prev, contentWidth: option }))
-						}
+						onChange={handleChange('contentWidth')}
 					/>
 					<div className={styles.bottomContainer}>
 						<Button

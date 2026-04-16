@@ -1,6 +1,5 @@
 import { createRoot } from 'react-dom/client';
 import { StrictMode, CSSProperties, useState } from 'react';
-import clsx from 'clsx';
 
 import { Article } from './components/article/Article';
 import { ArticleParamsForm } from './components/article-params-form/ArticleParamsForm';
@@ -13,22 +12,22 @@ const domNode = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(domNode);
 
 const App = () => {
-	const [finalSettings, setFinalSettings] = useState(defaultArticleState);
+	const [appliedSettings, setAppliedSettings] = useState(defaultArticleState);
 	return (
 		<main
-			className={clsx(styles.main)}
+			className={styles.main}
 			style={
 				{
-					'--font-family': finalSettings.fontFamilyOption.value,
-					'--font-size': finalSettings.fontSizeOption.value,
-					'--font-color': finalSettings.fontColor.value,
-					'--container-width': finalSettings.contentWidth.value,
-					'--bg-color': finalSettings.backgroundColor.value,
+					'--font-family': appliedSettings.fontFamilyOption.value,
+					'--font-size': appliedSettings.fontSizeOption.value,
+					'--font-color': appliedSettings.fontColor.value,
+					'--container-width': appliedSettings.contentWidth.value,
+					'--bg-color': appliedSettings.backgroundColor.value,
 				} as CSSProperties
 			}>
 			<ArticleParamsForm
-				initialSettings={finalSettings}
-				onApply={(newSettings) => setFinalSettings(newSettings)}
+				initialSettings={appliedSettings}
+				onApply={(newSettings) => setAppliedSettings(newSettings)}
 			/>
 			<Article />
 		</main>
